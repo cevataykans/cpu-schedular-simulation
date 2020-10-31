@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 void runner(void *param);
-int getBurstDuration(FILE *fp);
+int getCPUBurstDuration(FILE *fp);
 int getSleepDuration(FILE *fp);
 
 struct threadargs

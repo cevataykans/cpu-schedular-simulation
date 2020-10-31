@@ -5,13 +5,13 @@
 
 void init()
 {
-    srand(time(NULL));
+    srand(time(0));
 }
 
 int getRandomNum(int min, int max, int interval)
 {
-    int randomNum = (rand() % (max - min + 1)) - min;
-    randomNum = (randomNum % 100) * 100;
+    int randomNum = (rand() % (max - min + 1)) + min;
+    randomNum = (randomNum / 100) * 100;
     return randomNum;
 }
 

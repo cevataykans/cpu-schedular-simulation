@@ -4,6 +4,9 @@
 #include <pthread.h>
 #include "SEThread.h"
 #include "PSThread.h"
+#include "algorithms.h"
+#include "CommonFuncs.h"
+#include <unistd.h>
 //#include "lists/list.h"
 //#include "lists/WordList.h"
 
@@ -11,19 +14,21 @@
 //pthread_attr_t attrs[NUM_OF_THREADS];
 //struct threadargs threadParams[NUM_OF_THREADS];
 
-char *fileName;
+char *fileName; // Change
 struct programData data;
 struct threadargs threadParams[NUM_OF_THREADS];
 struct BurstNode* head;
 struct BurstNode* tail;
 int quantum;
-
+int done[NUM_OF_THREADS];
+struct BurstNode* (*algorithmPtr)(void);
 //int waitForExecution[NUM_OF_THREADS];
 //char *fileName = NULL;
 //struct programData data;
 
 int main(int argc, char *argv[])
 {
+    init();
     int threadCount = atoi(argv[1]);
     data.minCPU = atoi(argv[2]);
     data.maxCPU = atoi(argv[3]);
@@ -33,10 +38,14 @@ int main(int argc, char *argv[])
     data.duration = atoi(argv[7]);
     char *algorithm = argv[8];
     quantum = atoi(argv[9]);
-    if (strcmp(argv[10], "no-infile") == 0)
+    if (strcmp(argv[10], "no-infile") == 0){
         data.infile = NULL;
-    else
+        fileName = NULL;
+    }
+    else{
         data.infile = argv[10];
+        fileName = argv[10];
+    }
 
     printf("Thread count:%d, Mincpu:%d, MaxCpu:%d, MinIO:%d, maxIO: %d\n\n", threadCount, data.minCPU, data.maxCPU, data.minIO, data.maxIO);
     printf("Outputname: %s, duration:%d, alg:%s, quantum:%d, infile:%s\n\n", outputName, data.duration, algorithm, quantum, data.infile);
@@ -47,11 +56,22 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // Select algorithm
+    if(strcmp(algorithm, "FCFS") == 0)
+        algorithmPtr = &FCFS;
+    else if(strcmp(algorithm, "SJF") == 0)
+        algorithmPtr = &SJF;
+    else
+        algorithmPtr = &RR;
+
     //Create Queue here! with respect to the algorithm!
+    head = NULL;
+    tail = NULL;
 
     // Cretate threads
     for (int i = 0; i < threadCount; i++)
     {
+        done[i] = 1;
         //waitForExecution[i] = 0;
         pthread_attr_init(&threadParams[i].attr);
 
@@ -61,7 +81,7 @@ int main(int argc, char *argv[])
         pthread_create(&threadParams[i].tid, &threadParams[i].attr, runner, &threadParams[i]);
         printf("Thread created with id: %d\n", i);
     }
-
+    printf("All threads are created\n");
     // Sleep for 1 sec to wait for all threads to add burst to queue
     sleep(1);
 
@@ -72,6 +92,22 @@ int main(int argc, char *argv[])
         printf("Output file could not be opened!");
     }
     // Write here the SE thread logic
+    printf("output file is opened\n");
+    int sum = threadCount;
+    while(sum > 0){
+        printf("Inside while1\n");
+        struct BurstNode* curBurst = algorithmPtr();
+        printf("Inside while2\n");
+        sleep(0.001 * curBurst->burstTime);
+        printf("Inside while3\n");
+        pthread_cond_signal(&(threadParams[curBurst->id].cond));
+        printf("Inside while4\n");
+        sleep(5); // For test
+        sum = 0;
+        for(int i = 0 ; i < threadCount ; i++)
+            sum += done[i];
+        printf("Sleeps\n");
+    }
 
     // do not forget to free the burstnodes you receive from the queue!
 
