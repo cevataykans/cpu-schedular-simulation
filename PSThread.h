@@ -12,5 +12,4 @@ struct threadargs
     pthread_t tid;
     pthread_attr_t attr;
     pthread_cond_t cond;
-
-} threadargs;
+};

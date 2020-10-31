@@ -1,8 +1,11 @@
 #include "PSThread.h"
-#include "SEThread.h"
 #include "CommonFuncs.h"
 #include <pthread.h>
 #include <stdio.h>
+
+extern char *fileName;
+extern struct programData data;
+extern struct threadargs threadParams[NUM_OF_THREADS];
 
 void runner(void *param)
 {

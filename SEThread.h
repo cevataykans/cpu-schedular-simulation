@@ -1,8 +1,8 @@
-#define NUM_OF_THREADS 5
+#ifndef SETHREAD_H
+#define SETHREAD_H
 
-extern char *fileName;
-extern struct programData data;
-extern struct threadargs threadParams[NUM_OF_THREADS];
+#include <stdio.h>
+#define NUM_OF_THREADS 5
 
 struct programData
 {
@@ -12,4 +12,6 @@ struct programData
     int maxIO;
     int duration;
     char *infile;
-} programData;
+};
+
+#endif

@@ -11,6 +11,10 @@
 //pthread_attr_t attrs[NUM_OF_THREADS];
 //struct threadargs threadParams[NUM_OF_THREADS];
 
+char *fileName;
+struct programData data;
+struct threadargs threadParams[NUM_OF_THREADS];
+
 //int waitForExecution[NUM_OF_THREADS];
 //char *fileName = NULL;
 //struct programData data;
