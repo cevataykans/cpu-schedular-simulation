@@ -1,10 +1,15 @@
 #define NUM_OF_THREADS 5
 
-struct programData{
+char *fileName = NULL;
+struct programData data;
+struct threadargs threadParams[NUM_OF_THREADS];
+
+struct programData
+{
     int minCPU;
     int maxCPU;
     int minIO;
     int maxIO;
     int duration;
-    char* infile;
+    char *infile;
 } programData;

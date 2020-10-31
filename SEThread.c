@@ -9,11 +9,11 @@
 
 //pthread_t tids[NUM_OF_THREADS];
 //pthread_attr_t attrs[NUM_OF_THREADS];
-struct threadargs threadParams[NUM_OF_THREADS];
+//struct threadargs threadParams[NUM_OF_THREADS];
 
 //int waitForExecution[NUM_OF_THREADS];
-char *fileName = NULL;
-struct programData data;
+//char *fileName = NULL;
+//struct programData data;
 
 int main(int argc, char *argv[])
 {
@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    //Create Queue here! with respect to the algorithm!
+
     // Cretate threads
     for (int i = 0; i < threadCount; i++)
     {
@@ -47,6 +49,7 @@ int main(int argc, char *argv[])
         pthread_attr_init(&threadParams[i].attr);
 
         threadParams[i].id = i;
+        threadParams[i].cond = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
 
         pthread_create(&threadParams[i].tid, &threadParams[i].attr, runner, &threadParams[i]);
         printf("Thread created with id: %d\n", i);
@@ -54,6 +57,23 @@ int main(int argc, char *argv[])
 
     // Sleep for 1 sec to wait for all threads to add burst to queue
     sleep(1);
+
+    // Open output file to write!
+    FILE *fp = fopen(outputName, "w+");
+    if (fp == NULL)
+    {
+        printf("Output file could not be opened!");
+    }
+    // Write here the SE thread logic
+
+    // do not forget to free the burstnodes you receive from the queue!
+
+    //
+    //
+    //
+    //
+    //
+
     /*int done = 0;
     while (done == 0)
     {
@@ -178,5 +198,7 @@ int main(int argc, char *argv[])
     printf("\tIn microseconds: %ld\n",
            (endTime.tv_sec * 1000000 + endTime.tv_usec) -
                (startTime.tv_sec * 1000000 + startTime.tv_usec));*/
+
+    fclose(fp);
     return 0;
 }
