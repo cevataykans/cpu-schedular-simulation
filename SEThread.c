@@ -7,12 +7,12 @@
 //#include "lists/list.h"
 //#include "lists/WordList.h"
 
-pthread_t tids[NUM_OF_THREADS];
-pthread_attr_t attrs[NUM_OF_THREADS];
+//pthread_t tids[NUM_OF_THREADS];
+//pthread_attr_t attrs[NUM_OF_THREADS];
 struct threadargs threadParams[NUM_OF_THREADS];
 
-int waitForExecution[NUM_OF_THREADS];
-char* fileName = NULL;
+//int waitForExecution[NUM_OF_THREADS];
+char *fileName = NULL;
 struct programData data;
 
 int main(int argc, char *argv[])
@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
     data.maxCPU = atoi(argv[3]);
     data.minIO = atoi(argv[4]);
     data.maxIO = atoi(argv[5]);
-    char* outputName = argv[6];
-    data.duration  = atoi(argv[7]);
-    char* algorithm  = argv[8];
+    char *outputName = argv[6];
+    data.duration = atoi(argv[7]);
+    char *algorithm = argv[8];
     int quantum = atoi(argv[9]);
-    if(strcmp(argv[10], "no-infile") == 0)
+    if (strcmp(argv[10], "no-infile") == 0)
         data.infile = NULL;
     else
         data.infile = argv[10];
@@ -43,29 +43,34 @@ int main(int argc, char *argv[])
     // Cretate threads
     for (int i = 0; i < threadCount; i++)
     {
-        waitForExecution[i] = 0;
-        pthread_attr_init(&attrs[i]);
+        //waitForExecution[i] = 0;
+        pthread_attr_init(&threadParams[i].attr);
 
         threadParams[i].id = i;
 
-        pthread_create(&tids[i], &attrs[i], runner, &threadParams[i]);
+        pthread_create(&threadParams[i].tid, &threadParams[i].attr, runner, &threadParams[i]);
         printf("Thread created with id: %d\n", i);
     }
 
-    int done = 0;
-    while(done == 0){
+    // Sleep for 1 sec to wait for all threads to add burst to queue
+    sleep(1);
+    /*int done = 0;
+    while (done == 0)
+    {
         done = 1;
-        for(int i = 0 ; i < threadCount ; i++){
-            if(waitForExecution[i] == 0)
+        for (int i = 0; i < threadCount; i++)
+        {
+            if (waitForExecution[i] == 0)
                 done = 0;
         }
         // for test
-        if(done == 1){
-            for(int i = 0 ; i < threadCount ; i++)
-            printf("Waiting for %d is %d\n", i, waitForExecution[i]);
+        if (done == 1)
+        {
+            for (int i = 0; i < threadCount; i++)
+                printf("Waiting for %d is %d\n", i, waitForExecution[i]);
         }
-    }
-    
+    }*/
+
     printf("Completed!");
     /*gettimeofday(&end, NULL);
     printf("Threads completed...\n");
@@ -174,12 +179,4 @@ int main(int argc, char *argv[])
            (endTime.tv_sec * 1000000 + endTime.tv_usec) -
                (startTime.tv_sec * 1000000 + startTime.tv_usec));*/
     return 0;
-}
-
-void *runner(void* param){
-    int threadId = ((struct threadargs*)param)->id;
-    printf("Thread %d begins\n", threadId);
-    sleep(1);
-    waitForExecution[threadId] = 1;
-    pthread_exit(0);
 }
