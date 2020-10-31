@@ -1,6 +1,4 @@
-extern int q;
-extern struct BurstNode* head;
-extern struct BurstNode* tail;
+#include "SEThread.h"
 
 struct BurstNode* FCFS();
 struct BurstNode* SJF();

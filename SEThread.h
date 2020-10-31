@@ -1,8 +1,8 @@
 #define NUM_OF_THREADS 5
 
-char *fileName = NULL;
-struct programData data;
-struct threadargs threadParams[NUM_OF_THREADS];
+extern char *fileName;
+extern struct programData data;
+extern struct threadargs threadParams[NUM_OF_THREADS];
 
 struct programData
 {
