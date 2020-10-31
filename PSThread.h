@@ -1,4 +1,4 @@
-void *runner(void *param);
+void runner(void *param);
 
 struct threadargs
 {
