@@ -14,6 +14,9 @@
 char *fileName;
 struct programData data;
 struct threadargs threadParams[NUM_OF_THREADS];
+struct BurstNode* head;
+struct BurstNode* tail;
+int quantum;
 
 //int waitForExecution[NUM_OF_THREADS];
 //char *fileName = NULL;
@@ -29,7 +32,7 @@ int main(int argc, char *argv[])
     char *outputName = argv[6];
     data.duration = atoi(argv[7]);
     char *algorithm = argv[8];
-    int quantum = atoi(argv[9]);
+    quantum = atoi(argv[9]);
     if (strcmp(argv[10], "no-infile") == 0)
         data.infile = NULL;
     else

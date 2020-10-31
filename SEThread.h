@@ -14,4 +14,10 @@ struct programData
     char *infile;
 };
 
+struct BurstNode{
+    int id;
+    int burstTime;
+    struct BurstNode* next;
+};
+
 #endif

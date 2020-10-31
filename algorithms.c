@@ -4,6 +4,10 @@
 #include "algorithms.h"
 #include "SEThread.h"
 
+extern int quantum;
+extern struct BurstNode* head;
+extern struct BurstNode* tail;
+
 struct BurstNode* FCFS(){
     if(head == NULL)
         return NULL;
@@ -54,7 +58,7 @@ struct BurstNode* RR(){
     if(head == NULL)
         return NULL;
     if(head == tail){
-        if(head->burstTime <= q){
+        if(head->burstTime <= quantum){
             struct BurstNode* temp = head;
             head = NULL;
             tail = NULL;
@@ -63,20 +67,20 @@ struct BurstNode* RR(){
         struct BurstNode* returnNode = (struct BurstNode*)malloc(sizeof(struct BurstNode));
         returnNode->next = NULL;
         returnNode->id = head->id;
-        returnNode->burstTime = q;
-        head->burstTime = head->burstTime - q;
+        returnNode->burstTime = quantum;
+        head->burstTime = head->burstTime - quantum;
         return returnNode;
     }
     struct BurstNode* temp = head;
     head = head->next;
-    if(temp->burstTime > q){
+    if(temp->burstTime > quantum){
         struct BurstNode* newNode = (struct BurstNode*)malloc(sizeof(struct BurstNode));
         newNode->id = temp->id;
-        newNode->burstTime = temp->burstTime - q;
+        newNode->burstTime = temp->burstTime - quantum;
         newNode->next = NULL;
         tail->next = newNode;
         tail = newNode;
-        temp->burstTime = q;
+        temp->burstTime = quantum;
     }
     return temp;
 }
