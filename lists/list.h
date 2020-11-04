@@ -4,14 +4,11 @@
 #include <stdlib.h>
 
 struct LinkedList *createLinkedList();
-void destroyLinkedList(struct LinkedList *list);
-void addNode(struct LinkedList *list, char *data);
+void addNode(struct LinkedList *list, int id, int burstTime);
 void traverseList(struct LinkedList *list);
-void sortByInsertion(struct LinkedList *list);
-//int compareNodes(char word[], struct Node *to);
-//void swapNodes(struct Node *from, struct Node *to);
-struct Node *getHead(struct LinkedList *list);
-struct Node *hasData(struct LinkedList *list, char *word);
+struct Node* FCFS(struct LinkedList* list);
+struct Node* SJF(struct LinkedList* list);
+struct Node* RR(struct LinkedList* list);
 
 struct LinkedList
 {
@@ -22,6 +19,6 @@ struct LinkedList
 struct Node
 {
 	struct Node *next;
-	char word[1024];
-	int count;
+	int id;
+	int burstTime;
 };

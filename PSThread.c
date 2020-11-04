@@ -8,8 +8,7 @@ extern char *fileName;
 extern struct programData data;
 extern struct threadargs threadParams[NUM_OF_THREADS];
 extern int done[NUM_OF_THREADS];
-extern struct BurstNode* tail;
-extern struct BurstNode* head;
+extern struct LinkedList* readyQueue;
 
 void runner(void *param)
 {
@@ -60,18 +59,7 @@ void runner(void *param)
             int burstTime = getCPUBurstDuration(infile);
             printf("Duration2 %d\n", i);
             // Send burst duration to queue
-            struct BurstNode* newNode = (struct BurstNode*)malloc(sizeof(struct BurstNode));
-            newNode->id = threadId;
-            newNode->burstTime = burstTime;
-            newNode->next = NULL;
-            if(head == NULL){
-                head = newNode;
-                tail = newNode;
-            }
-            else{
-                tail->next = newNode;
-                tail = tail->next;
-            }
+            addNode(readyQueue, threadId, burstTime);
 
             // wait for mutex conditional variable
             pthread_cond_wait(&(threadParams[threadId].cond), &lock);

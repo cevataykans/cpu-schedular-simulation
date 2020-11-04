@@ -17,14 +17,8 @@
 char *fileName; // Change
 struct programData data;
 struct threadargs threadParams[NUM_OF_THREADS];
-struct BurstNode* head;
-struct BurstNode* tail;
-int quantum;
+struct LinkedList* readyQueue;
 int done[NUM_OF_THREADS];
-struct BurstNode* (*algorithmPtr)(void);
-//int waitForExecution[NUM_OF_THREADS];
-//char *fileName = NULL;
-//struct programData data;
 
 int main(int argc, char *argv[])
 {
@@ -57,16 +51,16 @@ int main(int argc, char *argv[])
     }
 
     // Select algorithm
+    struct Node* (*getNextNode)(struct LinkedList*);
     if(strcmp(algorithm, "FCFS") == 0)
-        algorithmPtr = &FCFS;
+        getNextNode = &FCFS;
     else if(strcmp(algorithm, "SJF") == 0)
-        algorithmPtr = &SJF;
+        getNextNode = &SJF;
     else
-        algorithmPtr = &RR;
+        getNextNode = &RR;
 
     //Create Queue here! with respect to the algorithm!
-    head = NULL;
-    tail = NULL;
+    readyQueue = createLinkedList();
 
     // Cretate threads
     for (int i = 0; i < threadCount; i++)
@@ -96,7 +90,7 @@ int main(int argc, char *argv[])
     int sum = threadCount;
     while(sum > 0){
         printf("Inside while1\n");
-        struct BurstNode* curBurst = algorithmPtr();
+        struct Node* curBurst = getNextNode(readyQueue);
         printf("Inside while2\n");
         sleep(0.001 * curBurst->burstTime);
         printf("Inside while3\n");

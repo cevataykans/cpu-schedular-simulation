@@ -69,30 +69,85 @@ struct LinkedList *createLinkedList()
 	return list;
 }
 
-struct Node *getHead(struct LinkedList *list)
-{
-	return list->head;
+struct Node* FCFS(struct LinkedList* list){
+    if(list->head == NULL)
+        return NULL;
+    struct Node* temp = list->head;
+    list->head = list->head->next;
+    if(temp == list->tail)
+        list->tail = NULL;
+    return temp;
+} 
+
+struct Node* SJF(struct LinkedList* list){
+    if(list->head == NULL)
+        return NULL;
+    if(list->head == list->tail){
+        struct BurstNode* temp = list->head;
+        list->head = NULL;
+        list->tail = NULL;
+        return temp;
+    }
+    struct Node* prevMinNode = NULL;
+    struct Node* minNode = list->head;
+    struct Node* cur = list->head->next;
+    struct Node* prev = list->head;
+    while(cur != NULL){
+        if(cur->burstTime < minNode->burstTime){
+            minNode = cur;
+            prevMinNode = prev;
+        }
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if(minNode == list->head)
+        list->head = list->head->next;
+
+    else if(minNode == list->tail){
+        list->tail = prevMinNode;
+        list->tail->next = NULL;
+    }
+
+    else
+        prevMinNode->next = minNode->next;
+
+    return minNode;
 }
 
-void destroyLinkedList(struct LinkedList *list)
-{
-	// free memory
-	struct Node *prev;
-	while (list->head != NULL)
-	{
-		prev = list->head;
-		list->head = list->head->next;
-
-		//free( prev->word);
-		free(prev);
-	}
-	list->head = NULL;
-	list->tail = NULL;
-	prev = NULL;
-	free(list);
+struct Node* RR(){
+	int quantum = data.quantum;
+    if(list->head == NULL)
+        return NULL;
+    if(list->head == list->tail){
+        if(list->head->burstTime <= quantum){
+            struct Node* temp = list->head;
+            list->head = NULL;
+            list->tail = NULL;
+            return temp;
+        }
+        struct Node* returnNode = (struct Node*)malloc(sizeof(struct Node));
+        returnNode->next = NULL;
+        returnNode->id = list->head->id;
+        returnNode->burstTime = quantum;
+        list->head->burstTime = list->head->burstTime - quantum;
+        return returnNode;
+    }
+    struct Node* temp = list->head;
+    list->head = list->head->next;
+    if(temp->burstTime > quantum){
+        struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+        newNode->id = temp->id;
+        newNode->burstTime = temp->burstTime - quantum;
+        newNode->next = NULL;
+        list->tail->next = newNode;
+        list->tail = newNode;
+        temp->burstTime = quantum;
+    }
+    return temp;
 }
 
-void addNode(struct LinkedList *list, char *data)
+void addNode(struct LinkedList *list, int id, int burstTime)
 {
 	if (list->head == NULL)
 	{
@@ -114,20 +169,6 @@ void addNode(struct LinkedList *list, char *data)
 	}
 }
 
-struct Node *hasData(struct LinkedList *list, char *word)
-{
-	struct Node *cur = list->head;
-	while (cur != NULL)
-	{
-		if (strcmp(cur->word, word) == 0)
-		{
-			return cur;
-		}
-		cur = cur->next;
-	}
-	return NULL;
-}
-
 void traverseList(struct LinkedList *list)
 {
 	struct Node *cur = list->head;
@@ -135,50 +176,5 @@ void traverseList(struct LinkedList *list)
 	{
 		printf("Data is: %s\t\t\tNumber is: %d\n", cur->word, cur->count);
 		cur = cur->next;
-	}
-}
-
-void swapNodes(struct Node *from, struct Node *to)
-{
-	char tempWord[1024];
-	strcpy(tempWord, from->word);
-	int tempCount = from->count;
-
-	strcpy(from->word, to->word);
-	from->count = to->count;
-
-	strcpy(to->word, tempWord);
-	to->count = tempCount;
-}
-
-int compareNodes(char word[], struct Node *to)
-{
-	return strcmp(word, to->word);
-}
-
-void sortByInsertion(struct LinkedList *list)
-{
-	struct Node *cur;
-	struct Node *smallest;
-	char smallWord[1024];
-	for (struct Node *i = list->head; i != NULL; i = i->next)
-	{
-		smallest = NULL;
-		strcpy(smallWord, i->word);
-		cur = i->next;
-		while (cur != NULL)
-		{
-			if (compareNodes(smallWord, cur) > 0)
-			{
-				smallest = cur;
-				strcpy(smallWord, cur->word);
-			}
-			cur = cur->next;
-		}
-
-		if (smallest != NULL)
-		{
-			swapNodes(i, smallest);
-		}
 	}
 }
