@@ -33,6 +33,7 @@ struct BurstNode* FCFS(struct LinkedList* list, int* flag){
         list->tail = NULL;
     pthread_mutex_unlock(&list_lock);
     temp->next= NULL;
+    temp->last = 1;
     return temp;
 } 
 
@@ -47,6 +48,7 @@ struct BurstNode* SJF(struct LinkedList* list, int* flag){
         list->head = NULL;
         list->tail = NULL;
         pthread_mutex_unlock(&list_lock);
+        temp->last = 1;
         return temp;
     }
     struct BurstNode* prevMinNode = NULL;
@@ -74,6 +76,7 @@ struct BurstNode* SJF(struct LinkedList* list, int* flag){
         prevMinNode->next = minNode->next;
     pthread_mutex_unlock(&list_lock);
     minNode->next = NULL;
+    minNode->last = 1;
     return minNode;
 }
 
@@ -90,17 +93,23 @@ struct BurstNode* RR(struct LinkedList* list, int* flag){
             list->head = NULL;
             list->tail = NULL;
             pthread_mutex_unlock(&list_lock);
+            temp->last = 1;
             return temp;
         }
         struct BurstNode* returnNode = (struct BurstNode*)malloc(sizeof(struct BurstNode));
         returnNode->next = NULL;
         returnNode->id = list->head->id;
         returnNode->burstTime = quantum;
+        returnNode->last = 0;
+        returnNode->first = list->head->first;
+        returnNode->entryTime = list->head->entryTime;
+        list->head->first = 0;
         list->head->burstTime = list->head->burstTime - quantum;
         pthread_mutex_unlock(&list_lock);
         return returnNode;
     }
     struct BurstNode* temp = list->head;
+    temp->last = 1;
     list->head = list->head->next;
     if(temp->burstTime > quantum){
         *flag = 1;
@@ -108,9 +117,13 @@ struct BurstNode* RR(struct LinkedList* list, int* flag){
         newNode->id = temp->id;
         newNode->burstTime = temp->burstTime - quantum;
         newNode->next = NULL;
+        newNode->entryTime = temp->entryTime;
+        newNode->first = 0;
+        newNode->initialBurstTime = temp->initialBurstTime;
         list->tail->next = newNode;
         list->tail = newNode;
         temp->burstTime = quantum;
+        temp->last = 0;
     }
     pthread_mutex_unlock(&list_lock);
     temp->next = NULL;
@@ -120,23 +133,25 @@ struct BurstNode* RR(struct LinkedList* list, int* flag){
 void addNode(struct LinkedList *list, int id, int burstTime)
 {
     pthread_mutex_lock(&list_lock);
+    struct timeval entryTime;
+    struct BurstNode* newNode = malloc(sizeof(struct BurstNode));
+    newNode->id = id;
+    newNode->burstTime = burstTime;
+    newNode->initialBurstTime = burstTime;
+    newNode->first = 1;
+    newNode->last = 0;
+    newNode->next = NULL;
 	if (list->head == NULL)
 	{
-		list->head = malloc(sizeof(struct BurstNode));
+		list->head = newNode;
 		list->tail = list->head;
-
-		list->head->id = id;
-        list->head->burstTime = burstTime;
-		list->head->next = NULL;
 	}
 	else
 	{
-		list->tail->next = malloc(sizeof(struct BurstNode));
+		list->tail->next = newNode;
 		list->tail = list->tail->next;
-
-		list->tail->next = NULL;
-		list->tail->id = id;
-		list->tail->burstTime = burstTime;
 	}
+    gettimeofday(&entryTime, NULL);
+    list->tail->entryTime = entryTime;
     pthread_mutex_unlock(&list_lock);
 }

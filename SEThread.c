@@ -90,6 +90,10 @@ int main(int argc, char *argv[])
     struct timeval curTime;
     int flag;
     int timeFlag = 1;
+    int totalResponseTime = 0;
+    int responseCount = 0;
+    int totalWaitingTime = 0;
+    int waitingCount = 0;
     while (sum > 0)
     {
         flag = 0;
@@ -128,17 +132,36 @@ int main(int argc, char *argv[])
         {
             gettimeofday(&curTime, NULL);
         }
+        if(curBurst->first == 1){
+            totalResponseTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec);
+            responseCount++;
+        }
+
         usleep(curBurst->burstTime * 1000);
+
+        if(curBurst->last == 1){
+            gettimeofday(&curTime, NULL);
+            totalWaitingTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec); 
+            waitingCount++;
+        }
 
         writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
         //totExecTime += curBurst->burstTime; depreciated
-        if (flag == 0)
+        if(curBurst->last == 1)//if (flag == 0)
             pthread_cond_signal(&(threadParams[curBurst->id].cond));
 
         free(curBurst);
     }
 
-    printf("Completed!\n");
+    if(waitingCount == 0 || responseCount == 0){
+        printf("At least one of the count is 0!\n");
+    }
+    else{
+        double averageResponseTime = (double) totalResponseTime / (double) responseCount;
+        double averageWaitingTime = (double) totalWaitingTime / (double) waitingCount;
+        printf("Average response time is %f\n", averageResponseTime);
+        printf("Average waiting time is %f\n", averageWaitingTime);
+    }
     fclose(fp);
     return 0;
 }

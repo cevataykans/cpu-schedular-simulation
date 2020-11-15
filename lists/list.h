@@ -23,6 +23,10 @@ struct BurstNode
 	struct BurstNode *next;
 	int id;
 	int burstTime;
+	int initialBurstTime;
+	int first;
+	int last;
+	struct timeval entryTime;
 };
 
 #endif
