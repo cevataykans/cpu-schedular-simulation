@@ -12,6 +12,7 @@ struct programData
     int maxIO;
     int duration;
     char *infile;
+    int quantum;
 };
 
 struct BurstNode{

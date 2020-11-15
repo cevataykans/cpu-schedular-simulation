@@ -4,11 +4,9 @@
 #include <pthread.h>
 #include "SEThread.h"
 #include "PSThread.h"
-#include "algorithms.h"
 #include "CommonFuncs.h"
 #include <unistd.h>
-//#include "lists/list.h"
-//#include "lists/WordList.h"
+#include "lists/list.h"
 
 //pthread_t tids[NUM_OF_THREADS];
 //pthread_attr_t attrs[NUM_OF_THREADS];
@@ -31,7 +29,7 @@ int main(int argc, char *argv[])
     char *outputName = argv[6];
     data.duration = atoi(argv[7]);
     char *algorithm = argv[8];
-    quantum = atoi(argv[9]);
+    data.quantum = atoi(argv[9]);
     if (strcmp(argv[10], "no-infile") == 0){
         data.infile = NULL;
         fileName = NULL;
@@ -42,7 +40,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Thread count:%d, Mincpu:%d, MaxCpu:%d, MinIO:%d, maxIO: %d\n\n", threadCount, data.minCPU, data.maxCPU, data.minIO, data.maxIO);
-    printf("Outputname: %s, duration:%d, alg:%s, quantum:%d, infile:%s\n\n", outputName, data.duration, algorithm, quantum, data.infile);
+    printf("Outputname: %s, duration:%d, alg:%s, quantum:%d, infile:%s\n\n", outputName, data.duration, algorithm, data.quantum, data.infile);
 
     if (threadCount <= 0)
     {
@@ -92,7 +90,7 @@ int main(int argc, char *argv[])
         printf("Inside while1\n");
         struct Node* curBurst = getNextNode(readyQueue);
         printf("Inside while2\n");
-        sleep(0.001 * curBurst->burstTime);
+        sleep(0.001 * (curBurst->burstTime));
         printf("Inside while3\n");
         pthread_cond_signal(&(threadParams[curBurst->id].cond));
         printf("Inside while4\n");
