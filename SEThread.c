@@ -11,7 +11,7 @@
 char *fileName; // Change
 struct programData data;
 struct threadargs threadParams[NUM_OF_THREADS];
-struct LinkedList* readyQueue;
+struct LinkedList *readyQueue;
 int done[NUM_OF_THREADS];
 pthread_cond_t waitPacket = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t test = PTHREAD_MUTEX_INITIALIZER;
@@ -28,11 +28,13 @@ int main(int argc, char *argv[])
     data.duration = atoi(argv[7]);
     char *algorithm = argv[8];
     data.quantum = atoi(argv[9]);
-    if (strcmp(argv[10], "no-infile") == 0){
+    if (strcmp(argv[10], "no-infile") == 0)
+    {
         data.infile = NULL;
         fileName = NULL;
     }
-    else{
+    else
+    {
         data.infile = argv[10];
         fileName = argv[10];
     }
@@ -47,10 +49,10 @@ int main(int argc, char *argv[])
     }
 
     // Select algorithm
-    struct BurstNode* (*getNextNode)(struct LinkedList*, int*);
-    if(strcmp(algorithm, "FCFS") == 0)
+    struct BurstNode *(*getNextNode)(struct LinkedList *, int *);
+    if (strcmp(algorithm, "FCFS") == 0)
         getNextNode = &FCFS;
-    else if(strcmp(algorithm, "SJF") == 0)
+    else if (strcmp(algorithm, "SJF") == 0)
         getNextNode = &SJF;
     else
         getNextNode = &RR;
@@ -83,34 +85,54 @@ int main(int argc, char *argv[])
     // Write here the SE thread logic
     printf("output file is opened\n");
     int sum = threadCount;
-    int totExecTime = 0; // depreciated!!!
-    struct timeval* startTime = NULL;
-    struct timeval* curTime = NULL;
+    //int totExecTime = 0; // depreciated!!!
+    struct timeval startTime;
+    struct timeval curTime;
     int flag;
-    while(sum > 0){
+    int timeFlag = 1;
+    while (sum > 0)
+    {
         flag = 0;
-        struct BurstNode* curBurst = getNextNode(readyQueue, &flag);
-        if(curBurst == NULL){
+        struct BurstNode *curBurst = getNextNode(readyQueue, &flag);
+        if (curBurst == NULL)
+        {
             pthread_mutex_lock(&test);
             pthread_cond_wait(&waitPacket, &test);
             pthread_mutex_unlock(&test);
             curBurst = getNextNode(readyQueue, &flag);
         }
-        if(startTime == NULL){
+
+        /*if (startTime == NULL)
+        {
             gettimeofday(startTime, NULL);
         }
-        else{
+        else
+        {
             gettimeofday(curTime, NULL);
-        }
-        if(curBurst->burstTime <= 0){
+        }*/
+
+        //printf("Total exe time: %ld \n", curTime.tv_usec - startTime.tv_usec);
+        if (curBurst->burstTime <= 0)
+        {
             sum--;
             continue;
         }
-        sleep(0.001 * (curBurst->burstTime));
 
-        writeOutput(fp, totExecTime, curBurst->burstTime, curBurst->id);
-        totExecTime += curBurst->burstTime;
-        if(flag == 0)
+        if (timeFlag > 0)
+        {
+            gettimeofday(&startTime, NULL);
+            curTime = startTime;
+            timeFlag = 0;
+        }
+        else
+        {
+            gettimeofday(&curTime, NULL);
+        }
+        usleep(curBurst->burstTime * 1000);
+
+        writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
+        //totExecTime += curBurst->burstTime; depreciated
+        if (flag == 0)
             pthread_cond_signal(&(threadParams[curBurst->id].cond));
 
         free(curBurst);

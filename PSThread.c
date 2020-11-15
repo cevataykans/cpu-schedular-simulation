@@ -9,7 +9,7 @@ extern char *fileName;
 extern struct programData data;
 extern struct threadargs threadParams[NUM_OF_THREADS];
 extern int done[NUM_OF_THREADS];
-extern struct LinkedList* readyQueue;
+extern struct LinkedList *readyQueue;
 extern pthread_cond_t waitPacket;
 
 void *runner(void *param)
@@ -42,7 +42,7 @@ void *runner(void *param)
             pthread_cond_wait(&threadParams[threadId].cond, &lock);
             // Get Sleep Duration
             int sleepTime = getSleepDuration(infile);
-            sleep(0.001 * sleepTime); // Sleep in ms!!!!!
+            usleep(sleepTime * 1000); // Sleep in ms!!!!!
         }
     }
     else
@@ -59,7 +59,7 @@ void *runner(void *param)
             pthread_cond_wait(&(threadParams[threadId].cond), &lock);
             // Get Sleep Duration
             int sleepTime = getSleepDuration(infile);
-            sleep(0.001 * sleepTime); // Sleep in ms!!!!!
+            usleep(sleepTime * 1000); // Sleep in ms!!!!!
             i++;
         }
     }
