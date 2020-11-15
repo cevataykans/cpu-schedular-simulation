@@ -1,6 +1,6 @@
 all: thread
 
 thread: *.c lists/*.c
-	gcc -Wall -o out *.c lists/*.c -lpthread
+	gcc -Wall -o schedule *.c lists/*.c -lpthread
 clean:
-	rm out
+	rm schedule

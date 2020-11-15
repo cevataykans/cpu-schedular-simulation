@@ -2,7 +2,7 @@
 #include "SEThread.h"
 #include <stdio.h>
 
-void runner(void *param);
+void *runner(void *param);
 int getCPUBurstDuration(FILE *fp);
 int getSleepDuration(FILE *fp);
 

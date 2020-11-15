@@ -8,19 +8,19 @@
 
 struct LinkedList *createLinkedList();
 void addNode(struct LinkedList *list, int id, int burstTime);
-struct Node* FCFS(struct LinkedList* list);
-struct Node* SJF(struct LinkedList* list);
-struct Node* RR(struct LinkedList* list);
+struct BurstNode* FCFS(struct LinkedList* list, int* flag);
+struct BurstNode* SJF(struct LinkedList* list, int* flag);
+struct BurstNode* RR(struct LinkedList* list, int* flag);
 
 struct LinkedList
 {
-	struct Node *head;
-	struct Node *tail;
+	struct BurstNode* head;
+	struct BurstNode* tail;
 };
 
-struct Node
+struct BurstNode
 {
-	struct Node *next;
+	struct BurstNode *next;
 	int id;
 	int burstTime;
 };

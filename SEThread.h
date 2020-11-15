@@ -15,10 +15,4 @@ struct programData
     int quantum;
 };
 
-struct BurstNode{
-    int id;
-    int burstTime;
-    struct BurstNode* next;
-};
-
 #endif

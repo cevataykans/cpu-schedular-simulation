@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "list.h"
 #include "../SEThread.h"
 
@@ -13,39 +14,45 @@ struct LinkedList *createLinkedList()
 	struct LinkedList *list = malloc(sizeof(struct LinkedList));
 	list->head = NULL;
 	list->tail = NULL;
-    if(pthread_mutex_init(&lock, NULL) != 0){
+    if(pthread_mutex_init(&list_lock, NULL) != 0){
         printf("Mutex lock has failed in createLinkedList()!\n");
         return NULL;
     }
 	return list;
 }
 
-struct Node* FCFS(struct LinkedList* list){
-    pthread_mutex_lock(&lock);
-    if(list->head == NULL)
+struct BurstNode* FCFS(struct LinkedList* list, int* flag){
+    pthread_mutex_lock(&list_lock);
+    if(list->head == NULL){
+        pthread_mutex_unlock(&list_lock);
         return NULL;
-    struct Node* temp = list->head;
+    }
+    struct BurstNode* temp = list->head;
     list->head = list->head->next;
     if(temp == list->tail)
         list->tail = NULL;
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&list_lock);
+    temp->next= NULL;
     return temp;
 } 
 
-struct Node* SJF(struct LinkedList* list){
-    pthread_mutex_lock(&lock);
-    if(list->head == NULL)
+struct BurstNode* SJF(struct LinkedList* list, int* flag){
+    pthread_mutex_lock(&list_lock);
+    if(list->head == NULL){
+        pthread_mutex_unlock(&list_lock);
         return NULL;
+    }
     if(list->head == list->tail){
         struct BurstNode* temp = list->head;
         list->head = NULL;
         list->tail = NULL;
+        pthread_mutex_unlock(&list_lock);
         return temp;
     }
-    struct Node* prevMinNode = NULL;
-    struct Node* minNode = list->head;
-    struct Node* cur = list->head->next;
-    struct Node* prev = list->head;
+    struct BurstNode* prevMinNode = NULL;
+    struct BurstNode* minNode = list->head;
+    struct BurstNode* cur = list->head->next;
+    struct BurstNode* prev = list->head;
     while(cur != NULL){
         if(cur->burstTime < minNode->burstTime){
             minNode = cur;
@@ -65,33 +72,39 @@ struct Node* SJF(struct LinkedList* list){
 
     else
         prevMinNode->next = minNode->next;
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&list_lock);
+    minNode->next = NULL;
     return minNode;
 }
 
-struct Node* RR(struct LinkedList* list){
-    pthread_mutex_lock(&lock);
+struct BurstNode* RR(struct LinkedList* list, int* flag){
+    pthread_mutex_lock(&list_lock);
 	int quantum = data.quantum;
-    if(list->head == NULL)
+    if(list->head == NULL){
+        pthread_mutex_unlock(&list_lock);
         return NULL;
+    }
     if(list->head == list->tail){
         if(list->head->burstTime <= quantum){
-            struct Node* temp = list->head;
+            struct BurstNode* temp = list->head;
             list->head = NULL;
             list->tail = NULL;
+            pthread_mutex_unlock(&list_lock);
             return temp;
         }
-        struct Node* returnNode = (struct Node*)malloc(sizeof(struct Node));
+        struct BurstNode* returnNode = (struct BurstNode*)malloc(sizeof(struct BurstNode));
         returnNode->next = NULL;
         returnNode->id = list->head->id;
         returnNode->burstTime = quantum;
         list->head->burstTime = list->head->burstTime - quantum;
+        pthread_mutex_unlock(&list_lock);
         return returnNode;
     }
-    struct Node* temp = list->head;
+    struct BurstNode* temp = list->head;
     list->head = list->head->next;
     if(temp->burstTime > quantum){
-        struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+        *flag = 1;
+        struct BurstNode* newNode = (struct BurstNode*)malloc(sizeof(struct BurstNode));
         newNode->id = temp->id;
         newNode->burstTime = temp->burstTime - quantum;
         newNode->next = NULL;
@@ -99,16 +112,17 @@ struct Node* RR(struct LinkedList* list){
         list->tail = newNode;
         temp->burstTime = quantum;
     }
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&list_lock);
+    temp->next = NULL;
     return temp;
 }
 
 void addNode(struct LinkedList *list, int id, int burstTime)
 {
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&list_lock);
 	if (list->head == NULL)
 	{
-		list->head = malloc(sizeof(struct Node));
+		list->head = malloc(sizeof(struct BurstNode));
 		list->tail = list->head;
 
 		list->head->id = id;
@@ -117,12 +131,12 @@ void addNode(struct LinkedList *list, int id, int burstTime)
 	}
 	else
 	{
-		list->tail->next = malloc(sizeof(struct Node));
+		list->tail->next = malloc(sizeof(struct BurstNode));
 		list->tail = list->tail->next;
 
 		list->tail->next = NULL;
 		list->tail->id = id;
 		list->tail->burstTime = burstTime;
 	}
-    pthread_mutex_unlock(&lock);
+    pthread_mutex_unlock(&list_lock);
 }

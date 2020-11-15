@@ -3,14 +3,16 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "lists/list.h"
 
 extern char *fileName;
 extern struct programData data;
 extern struct threadargs threadParams[NUM_OF_THREADS];
 extern int done[NUM_OF_THREADS];
 extern struct LinkedList* readyQueue;
+extern pthread_cond_t waitPacket;
 
-void runner(void *param)
+void *runner(void *param)
 {
     int threadId = ((struct threadargs *)param)->id;
     pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -27,22 +29,17 @@ void runner(void *param)
         infile = fopen(modifiedFileName, "r");
     }
 
-    //sleep(1);
-    //waitForExecution[threadId] = 1;
-
     if (infile != NULL)
     {
         while (!feof(infile))
         {
             // Get Burst Duration
             int burstTime = getCPUBurstDuration(infile);
-
             // Send burst duration to queue
-            // write code here by deleting this line -----!
-
+            addNode(readyQueue, threadId, burstTime);
+            pthread_cond_signal(&waitPacket);
             // wait for mutex conditional variable
             pthread_cond_wait(&threadParams[threadId].cond, &lock);
-
             // Get Sleep Duration
             int sleepTime = getSleepDuration(infile);
             sleep(0.001 * sleepTime); // Sleep in ms!!!!!
@@ -50,29 +47,24 @@ void runner(void *param)
     }
     else
     {
-        printf("Else thread\n");
         int i = 0;
-        while (i < data.duration) // this needs  to be improved if an infile is read!!!!!
+        while (i < data.duration)
         {
-            printf("Duration1 %d\n", i);
             // Get Burst Duration
             int burstTime = getCPUBurstDuration(infile);
-            printf("Duration2 %d\n", i);
             // Send burst duration to queue
             addNode(readyQueue, threadId, burstTime);
-
+            pthread_cond_signal(&waitPacket);
             // wait for mutex conditional variable
             pthread_cond_wait(&(threadParams[threadId].cond), &lock);
-            printf("Duration3 %d\n", i);
             // Get Sleep Duration
             int sleepTime = getSleepDuration(infile);
-            printf("Sleep time: %d\n", sleepTime);
             sleep(0.001 * sleepTime); // Sleep in ms!!!!!
-            printf("Duration4 %d\n", i);
             i++;
         }
     }
-    done[threadId] = 0;
+    addNode(readyQueue, threadId, -1);
+    pthread_cond_signal(&waitPacket);
     pthread_exit(0);
 }
 
@@ -82,7 +74,6 @@ int getCPUBurstDuration(FILE *fp)
     if (fp == NULL)
     {
         burstTime = getRandomNum(data.minCPU, data.maxCPU, 100);
-        printf("BurstTime:%d\n", burstTime);
     }
     else
     {
@@ -98,7 +89,6 @@ int getSleepDuration(FILE *fp)
     if (fp == NULL)
     {
         sleepTime = getRandomNum(data.minIO, data.maxIO, 100);
-        printf("IO:%d\n", sleepTime);
     }
     else
     {
