@@ -83,7 +83,9 @@ int main(int argc, char *argv[])
     // Write here the SE thread logic
     printf("output file is opened\n");
     int sum = threadCount;
-    int totExecTime = 0;
+    int totExecTime = 0; // depreciated!!!
+    struct timeval* startTime = NULL;
+    struct timeval* curTime = NULL;
     int flag;
     while(sum > 0){
         flag = 0;
@@ -93,6 +95,12 @@ int main(int argc, char *argv[])
             pthread_cond_wait(&waitPacket, &test);
             pthread_mutex_unlock(&test);
             curBurst = getNextNode(readyQueue, &flag);
+        }
+        if(startTime == NULL){
+            gettimeofday(startTime, NULL);
+        }
+        else{
+            gettimeofday(curTime, NULL);
         }
         if(curBurst->burstTime <= 0){
             sum--;
