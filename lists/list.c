@@ -6,27 +6,34 @@
 #include "../SEThread.h"
 
 extern struct programData data;
+pthread_mutex_t list_lock;
 
 struct LinkedList *createLinkedList()
 {
 	struct LinkedList *list = malloc(sizeof(struct LinkedList));
 	list->head = NULL;
 	list->tail = NULL;
-
+    if(pthread_mutex_init(&lock, NULL) != 0){
+        printf("Mutex lock has failed in createLinkedList()!\n");
+        return NULL;
+    }
 	return list;
 }
 
 struct Node* FCFS(struct LinkedList* list){
+    pthread_mutex_lock(&lock);
     if(list->head == NULL)
         return NULL;
     struct Node* temp = list->head;
     list->head = list->head->next;
     if(temp == list->tail)
         list->tail = NULL;
+    pthread_mutex_unlock(&lock);
     return temp;
 } 
 
 struct Node* SJF(struct LinkedList* list){
+    pthread_mutex_lock(&lock);
     if(list->head == NULL)
         return NULL;
     if(list->head == list->tail){
@@ -58,11 +65,12 @@ struct Node* SJF(struct LinkedList* list){
 
     else
         prevMinNode->next = minNode->next;
-
+    pthread_mutex_unlock(&lock);
     return minNode;
 }
 
 struct Node* RR(struct LinkedList* list){
+    pthread_mutex_lock(&lock);
 	int quantum = data.quantum;
     if(list->head == NULL)
         return NULL;
@@ -91,11 +99,13 @@ struct Node* RR(struct LinkedList* list){
         list->tail = newNode;
         temp->burstTime = quantum;
     }
+    pthread_mutex_unlock(&lock);
     return temp;
 }
 
 void addNode(struct LinkedList *list, int id, int burstTime)
 {
+    pthread_mutex_lock(&lock);
 	if (list->head == NULL)
 	{
 		list->head = malloc(sizeof(struct Node));
@@ -114,4 +124,5 @@ void addNode(struct LinkedList *list, int id, int burstTime)
 		list->tail->id = id;
 		list->tail->burstTime = burstTime;
 	}
+    pthread_mutex_unlock(&lock);
 }
