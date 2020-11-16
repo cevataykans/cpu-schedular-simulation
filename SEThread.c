@@ -126,7 +126,9 @@ int main(int argc, char *argv[])
 
         if (curBurst->first == 1)
         {
-            totalResponseTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec);
+            gettimeofday(&curTime, NULL);
+            struct timeval entryTime = curBurst->entryTime;
+            totalResponseTime += (curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec);
             responseCount++;
         }
 
@@ -136,7 +138,8 @@ int main(int argc, char *argv[])
         if (curBurst->last == 1)
         {
             gettimeofday(&curTime, NULL);
-            totalWaitingTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec);
+            struct timeval entryTime = curBurst->entryTime;
+            totalWaitingTime += ( (curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec) - (curBurst->burstTime) * 1000);
             waitingCount++;
         }
 
