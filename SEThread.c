@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
     int totalResponseTime = 0;
     int responseCount = 0;
     int totalWaitingTime = 0;
-    int waitingCount = 0;
     while (sum > 0)
     {
         flag = 0;
@@ -140,7 +139,6 @@ int main(int argc, char *argv[])
             gettimeofday(&curTime, NULL);
             struct timeval entryTime = curBurst->entryTime;
             totalWaitingTime += ( (curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec) - (curBurst->burstTime) * 1000);
-            waitingCount++;
         }
 
         //writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
@@ -151,16 +149,15 @@ int main(int argc, char *argv[])
         free(curBurst);
     }
 
-    if (waitingCount == 0 || responseCount == 0)
+    if (responseCount == 0)
     {
-        printf("At least one of the count is 0!\n");
+        printf("Response count is 0!\n");
     }
     else
     {
         double averageResponseTime = (double)totalResponseTime / (double)responseCount;
-        double averageWaitingTime = (double)totalWaitingTime / (double)waitingCount;
         printf("Average response time is %f\n", averageResponseTime);
-        printf("Average waiting time is %f\n", averageWaitingTime);
+        printf("Total waiting time is %d\n", totalWaitingTime);
     }
     fclose(fp);
     return 0;
