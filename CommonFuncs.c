@@ -6,12 +6,12 @@
 
 void init()
 {
-    srand(time(0));
+    srand(time(NULL));
 }
 
 int getRandomNum(int min, int max, int interval)
 {
-    int randomNum = (rand() % (max - min + 101)) + min;
+    int randomNum = (rand() % (max - min + 1)) + min;
     randomNum = ((randomNum) / 100) * 100;
     return randomNum;
 }
