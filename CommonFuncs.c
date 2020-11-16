@@ -41,5 +41,5 @@ void writeOutput(FILE *fp, long int totExecTime, int burstTime, int threadId)
             formattedTime[i] = strExecTime[i - 10 + strlen(strExecTime)];
     }
     formattedTime[10] = '\0';
-    fprintf(fp, "%s %d %d\n", formattedTime, burstTime, threadId);
+    fprintf(fp, "%s %d %d\n", formattedTime, burstTime, threadId + 1);
 }

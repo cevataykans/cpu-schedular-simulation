@@ -17,7 +17,8 @@ pthread_cond_t waitPacket = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t test = PTHREAD_MUTEX_INITIALIZER;
 
 int totWaitingTime[NUM_OF_THREADS];
-int lastExeFinishTime[NUM_OF_THREADS];
+int totResponseTime[NUM_OF_THREADS];
+int responseCount[NUM_OF_THREADS];
 
 int main(int argc, char *argv[])
 {
@@ -66,7 +67,8 @@ int main(int argc, char *argv[])
     for (int i = 0; i < threadCount; i++)
     {
         totWaitingTime[i] = 0;
-        lastExeFinishTime[i] = -1;
+        totResponseTime[i] = 0;
+        responseCount[i] = 0;
     }
 
     // Cretate threads
@@ -97,12 +99,8 @@ int main(int argc, char *argv[])
     //int totExecTime = 0; // depreciated!!!
     struct timeval startTime;
     struct timeval exeTime;
-    struct timeval curTime;
     int flag;
     int timeFlag = 1;
-    int totalResponseTime = 0;
-    int responseCount = 0;
-    int totalWaitingTime = 0;
     while (sum > 0)
     {
         flag = 0;
@@ -132,26 +130,18 @@ int main(int argc, char *argv[])
             gettimeofday(&exeTime, NULL);
         }
 
-        int waitingTime = (exeTime.tv_sec - curBurst->entryTime.tv_sec) * 1000000 + (exeTime.tv_usec - curBurst->entryTime.tv_usec);
+        int waitingTime = ((exeTime.tv_sec - curBurst->entryTime.tv_sec) * 1000000 + (exeTime.tv_usec - curBurst->entryTime.tv_usec)) / 1000;
         totWaitingTime[curBurst->id] += waitingTime;
 
         if (curBurst->first == 1)
         {
-            gettimeofday(&curTime, NULL);
             struct timeval entryTime = curBurst->entryTime;
-            totalResponseTime += (curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec);
-            responseCount++;
+            totResponseTime[curBurst->id] += ((exeTime.tv_sec - entryTime.tv_sec) * 1000000 + (exeTime.tv_usec - entryTime.tv_usec)) / 1000;
+            responseCount[curBurst->id]++;
         }
 
         usleep(curBurst->burstTime * 1000);
         writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
-
-        if (curBurst->last == 1)
-        {
-            gettimeofday(&curTime, NULL);
-            struct timeval entryTime = curBurst->entryTime;
-            totalWaitingTime += ((curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec) - (curBurst->burstTime) * 1000);
-        }
 
         //writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
         //totExecTime += curBurst->burstTime; depreciated
@@ -161,7 +151,7 @@ int main(int argc, char *argv[])
         free(curBurst);
     }
 
-    if (responseCount == 0)
+    /*if (responseCount == 0)
     {
         printf("Response count is 0!\n");
     }
@@ -170,13 +160,14 @@ int main(int argc, char *argv[])
         double averageResponseTime = (double)totalResponseTime / (double)responseCount;
         printf("Average response time is %f\n", averageResponseTime);
         //printf("Total waiting time is %d\n", totalWaitingTime);
-    }
+    }*/
 
     for (int i = 0; i < threadCount; i++)
     {
-        printf("Statistics for process: %d\n", i);
-        printf("\tTotal waiting time: %d ms.\n", totWaitingTime[i] / 1000);
-        printf("\tAverage response time: not available yet\n");
+        printf("Statistics for process: %d\n", i + 1);
+        printf("\tTotal waiting time: %d ms.\n", totWaitingTime[i]);
+        if (responseCount[i] > 0)
+            printf("\tAverage response time: %f ms.\n", totResponseTime[i] * 1.0 / responseCount[i]);
     }
 
     fclose(fp);
