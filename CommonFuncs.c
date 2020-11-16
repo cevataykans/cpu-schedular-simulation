@@ -20,7 +20,7 @@ void getFileName(char name[], int id)
 {
     strcpy(name, fileName);
     int nameLength = strlen(name);
-    name[nameLength] = '0' + id;
+    name[nameLength] = '0' + (id + 1);
     name[nameLength + 1] = '.';
     name[nameLength + 2] = 't';
     name[nameLength + 3] = 'x';
