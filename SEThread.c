@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     int sum = threadCount;
     //int totExecTime = 0; // depreciated!!!
     struct timeval startTime;
+    struct timeval exeTime;
     struct timeval curTime;
     int flag;
     int timeFlag = 1;
@@ -106,16 +107,6 @@ int main(int argc, char *argv[])
             curBurst = getNextNode(readyQueue, &flag);
         }
 
-        /*if (startTime == NULL)
-        {
-            gettimeofday(startTime, NULL);
-        }
-        else
-        {
-            gettimeofday(curTime, NULL);
-        }*/
-
-        //printf("Total exe time: %ld \n", curTime.tv_usec - startTime.tv_usec);
         if (curBurst->burstTime <= 0)
         {
             sum--;
@@ -125,40 +116,46 @@ int main(int argc, char *argv[])
         if (timeFlag > 0)
         {
             gettimeofday(&startTime, NULL);
-            curTime = startTime;
+            exeTime = startTime;
             timeFlag = 0;
         }
         else
         {
-            gettimeofday(&curTime, NULL);
+            gettimeofday(&exeTime, NULL);
         }
-        if(curBurst->first == 1){
+
+        if (curBurst->first == 1)
+        {
             totalResponseTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec);
             responseCount++;
         }
 
         usleep(curBurst->burstTime * 1000);
+        writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
 
-        if(curBurst->last == 1){
+        if (curBurst->last == 1)
+        {
             gettimeofday(&curTime, NULL);
-            totalWaitingTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec); 
+            totalWaitingTime += (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec);
             waitingCount++;
         }
 
-        writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
+        //writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
         //totExecTime += curBurst->burstTime; depreciated
-        if(curBurst->last == 1)//if (flag == 0)
+        if (curBurst->last == 1) //if (flag == 0)
             pthread_cond_signal(&(threadParams[curBurst->id].cond));
 
         free(curBurst);
     }
 
-    if(waitingCount == 0 || responseCount == 0){
+    if (waitingCount == 0 || responseCount == 0)
+    {
         printf("At least one of the count is 0!\n");
     }
-    else{
-        double averageResponseTime = (double) totalResponseTime / (double) responseCount;
-        double averageWaitingTime = (double) totalWaitingTime / (double) waitingCount;
+    else
+    {
+        double averageResponseTime = (double)totalResponseTime / (double)responseCount;
+        double averageWaitingTime = (double)totalWaitingTime / (double)waitingCount;
         printf("Average response time is %f\n", averageResponseTime);
         printf("Average waiting time is %f\n", averageWaitingTime);
     }
