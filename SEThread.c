@@ -16,6 +16,9 @@ int done[NUM_OF_THREADS];
 pthread_cond_t waitPacket = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t test = PTHREAD_MUTEX_INITIALIZER;
 
+int totWaitingTime[NUM_OF_THREADS];
+int lastExeFinishTime[NUM_OF_THREADS];
+
 int main(int argc, char *argv[])
 {
     init();
@@ -59,6 +62,12 @@ int main(int argc, char *argv[])
 
     //Create Queue here! with respect to the algorithm!
     readyQueue = createLinkedList();
+
+    for (int i = 0; i < threadCount; i++)
+    {
+        totWaitingTime[i] = 0;
+        lastExeFinishTime[i] = -1;
+    }
 
     // Cretate threads
     for (int i = 0; i < threadCount; i++)
@@ -123,6 +132,9 @@ int main(int argc, char *argv[])
             gettimeofday(&exeTime, NULL);
         }
 
+        int waitingTime = (exeTime.tv_sec - curBurst->entryTime.tv_sec) * 1000000 + (exeTime.tv_usec - curBurst->entryTime.tv_usec);
+        totWaitingTime[curBurst->id] += waitingTime;
+
         if (curBurst->first == 1)
         {
             gettimeofday(&curTime, NULL);
@@ -138,7 +150,7 @@ int main(int argc, char *argv[])
         {
             gettimeofday(&curTime, NULL);
             struct timeval entryTime = curBurst->entryTime;
-            totalWaitingTime += ( (curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec) - (curBurst->burstTime) * 1000);
+            totalWaitingTime += ((curTime.tv_sec - entryTime.tv_sec) * 1000000 + (curTime.tv_usec - entryTime.tv_usec) - (curBurst->burstTime) * 1000);
         }
 
         //writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
@@ -157,8 +169,16 @@ int main(int argc, char *argv[])
     {
         double averageResponseTime = (double)totalResponseTime / (double)responseCount;
         printf("Average response time is %f\n", averageResponseTime);
-        printf("Total waiting time is %d\n", totalWaitingTime);
+        //printf("Total waiting time is %d\n", totalWaitingTime);
     }
+
+    for (int i = 0; i < threadCount; i++)
+    {
+        printf("Statistics for process: %d\n", i);
+        printf("\tTotal waiting time: %d ms.\n", totWaitingTime[i] / 1000);
+        printf("\tAverage response time: not available yet\n");
+    }
+
     fclose(fp);
     return 0;
 }
