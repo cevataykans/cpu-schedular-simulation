@@ -16,7 +16,7 @@ void *runner(void *param)
 {
     int threadId = ((struct threadargs *)param)->id;
     pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-    printf("Thread %d begins\n", threadId);
+    printf("Process %d begins\n", threadId + 1);
 
     FILE *infile = NULL;
     if (fileName != NULL)

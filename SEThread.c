@@ -74,8 +74,6 @@ int main(int argc, char *argv[])
     // Cretate threads
     for (int i = 0; i < threadCount; i++)
     {
-        done[i] = 1;
-        //waitForExecution[i] = 0;
         pthread_attr_init(&threadParams[i].attr);
 
         threadParams[i].id = i;
@@ -95,16 +93,15 @@ int main(int argc, char *argv[])
     }
     // Write here the SE thread logic
     printf("output file is opened\n");
+    int flag = 0; // depreciated
     int sum = threadCount;
-    //int totExecTime = 0; // depreciated!!!
     struct timeval startTime;
     struct timeval exeTime;
-    int flag;
     int timeFlag = 1;
     while (sum > 0)
     {
-        flag = 0;
-        struct BurstNode *curBurst = getNextNode(readyQueue, &flag);
+        flag = 0;                                                    // depreciated
+        struct BurstNode *curBurst = getNextNode(readyQueue, &flag); // flag arg is depreciated, is not used, can be remvoed to increase efficiency
         if (curBurst == NULL)
         {
             pthread_mutex_lock(&test);
@@ -143,31 +140,20 @@ int main(int argc, char *argv[])
         usleep(curBurst->burstTime * 1000);
         writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
 
-        //writeOutput(fp, (curTime.tv_sec - startTime.tv_sec) * 1000000 + (curTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
-        //totExecTime += curBurst->burstTime; depreciated
         if (curBurst->last == 1) //if (flag == 0)
             pthread_cond_signal(&(threadParams[curBurst->id].cond));
 
         free(curBurst);
     }
 
-    /*if (responseCount == 0)
-    {
-        printf("Response count is 0!\n");
-    }
-    else
-    {
-        double averageResponseTime = (double)totalResponseTime / (double)responseCount;
-        printf("Average response time is %f\n", averageResponseTime);
-        //printf("Total waiting time is %d\n", totalWaitingTime);
-    }*/
-
     for (int i = 0; i < threadCount; i++)
     {
-        printf("Statistics for process: %d\n", i + 1);
-        printf("\tTotal waiting time: %d ms.\n", totWaitingTime[i]);
         if (responseCount[i] > 0)
+        {
+            printf("Statistics for process: %d\n", i + 1);
+            printf("\tTotal waiting time: %d ms.\n", totWaitingTime[i]);
             printf("\tAverage response time: %f ms.\n", totResponseTime[i] * 1.0 / responseCount[i]);
+        }
     }
 
     fclose(fp);

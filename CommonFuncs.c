@@ -9,10 +9,28 @@ void init()
     srand(time(NULL));
 }
 
-int getRandomNum(int min, int max, int interval)
+int getRandomNum(int min, int max, int interval) // 200, 300
 {
-    int randomNum = (rand() % (max - min + 1)) + min;
-    randomNum = ((randomNum) / 100) * 100;
+    int randomNum = (rand() % (max - min + 100)) + min; // [200, 400)
+    randomNum = ((randomNum) / 100) * 100;              // 250 => 300, < 200
+
+    if (randomNum == min || randomNum == max)
+    {
+    }
+    else if (randomNum < min)
+    {
+        printf("FAILURE min %d\n", randomNum);
+        exit(0);
+    }
+    else if (randomNum > max)
+    {
+        printf("failure max %d\n", randomNum);
+        exit(0);
+    }
+    else
+    {
+    }
+
     return randomNum;
 }
 
