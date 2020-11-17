@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include "SEThread.h"
+#include "schedule.h"
 #include "PSThread.h"
 #include "CommonFuncs.h"
 #include <unistd.h>
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
         fileName = argv[10];
     }
 
-    printf("Thread count:%d, Mincpu:%d, MaxCpu:%d, MinIO:%d, maxIO: %d\n\n", threadCount, data.minCPU, data.maxCPU, data.minIO, data.maxIO);
+    printf("\nThread count:%d, Mincpu:%d, MaxCpu:%d, MinIO:%d, maxIO: %d\n", threadCount, data.minCPU, data.maxCPU, data.minIO, data.maxIO);
     printf("Outputname: %s, duration:%d, alg:%s, quantum:%d, infile:%s\n\n", outputName, data.duration, algorithm, data.quantum, data.infile);
 
     if (threadCount <= 0)
@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
         if (curBurst->burstTime <= 0)
         {
             sum--;
+            free(curBurst);
             continue;
         }
 

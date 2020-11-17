@@ -44,6 +44,7 @@ void *runner(void *param)
             int sleepTime = getSleepDuration(infile);
             usleep(sleepTime * 1000); // Sleep in ms!!!!!
         }
+        fclose(infile);
     }
     else
     {

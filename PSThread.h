@@ -1,5 +1,5 @@
 #include <pthread.h>
-#include "SEThread.h"
+#include "schedule.h"
 #include <stdio.h>
 
 void *runner(void *param);

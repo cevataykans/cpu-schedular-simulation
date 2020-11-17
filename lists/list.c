@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "list.h"
-#include "../SEThread.h"
+#include "../schedule.h"
 
 extern struct programData data;
 pthread_mutex_t list_lock;
