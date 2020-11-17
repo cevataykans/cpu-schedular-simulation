@@ -36,7 +36,7 @@ void *runner(void *param)
             // Get Burst Duration
             int burstTime = getCPUBurstDuration(infile);
             // Send burst duration to queue
-            addNode(readyQueue, threadId, burstTime);
+            addNode(readyQueue, threadId, burstTime, 1);
             pthread_cond_signal(&waitPacket);
             // wait for mutex conditional variable
             pthread_cond_wait(&threadParams[threadId].cond, &lock);
@@ -54,7 +54,7 @@ void *runner(void *param)
             // Get Burst Duration
             int burstTime = getCPUBurstDuration(infile);
             // Send burst duration to queue
-            addNode(readyQueue, threadId, burstTime);
+            addNode(readyQueue, threadId, burstTime, 1);
             pthread_cond_signal(&waitPacket);
             // wait for mutex conditional variable
             pthread_cond_wait(&(threadParams[threadId].cond), &lock);
@@ -64,7 +64,7 @@ void *runner(void *param)
             i++;
         }
     }
-    addNode(readyQueue, threadId, -1);
+    addNode(readyQueue, threadId, -1, 0);
     pthread_cond_signal(&waitPacket);
     pthread_exit(0);
 }

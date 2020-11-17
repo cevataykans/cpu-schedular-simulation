@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
     if (threadCount <= 0)
     {
-        printf("Number of argumnets must be between 1 and 5 inclusive...");
+        printf("Number of argumnets must be between 1 and 5 inclusive...\n");
         return -1;
     }
 
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     FILE *fp = fopen(outputName, "w+");
     if (fp == NULL)
     {
-        printf("Output file could not be opened!");
+        printf("Output file could not be opened!\n");
         return -1;
     }
     // Write here the SE thread logic
@@ -138,17 +138,24 @@ int main(int argc, char *argv[])
             responseCount[curBurst->id]++;
         }
 
-        usleep(curBurst->burstTime * 1000);
-        writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
+        if(curBurst->last == 1) usleep(curBurst->burstTime * 1000);
+        else usleep(data.quantum * 1000);
+        //writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
 
-        if (curBurst->last == 1) //if (flag == 0)
+        if (curBurst->last == 1){ //if (flag == 0)
             pthread_cond_signal(&(threadParams[curBurst->id].cond));
-
+            writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), curBurst->burstTime, curBurst->id);
+        }
+        else{
+            addNode(readyQueue, curBurst->id, curBurst->burstTime - data.quantum, 0);
+            writeOutput(fp, (exeTime.tv_sec - startTime.tv_sec) * 1000000 + (exeTime.tv_usec - startTime.tv_usec), data.quantum, curBurst->id);
+        }
         free(curBurst);
     }
 
     for (int i = 0; i < threadCount; i++)
     {
+        pthread_join(threadParams[i].tid, NULL);
         if (responseCount[i] > 0)
         {
             printf("Statistics for process: %d\n", i + 1);
@@ -157,6 +164,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    free(readyQueue);
     fclose(fp);
     return 0;
 }
