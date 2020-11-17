@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 struct LinkedList *createLinkedList();
-void addNode(struct LinkedList *list, int id, int burstTime);
+void addNode(struct LinkedList *list, int id, int burstTime, int first);
 struct BurstNode* FCFS(struct LinkedList* list, int* flag);
 struct BurstNode* SJF(struct LinkedList* list, int* flag);
 struct BurstNode* RR(struct LinkedList* list, int* flag);
